@@ -8,3 +8,6 @@ zafind.ash n
 
 # Branches
 Due to KoLMafia stuff I dont understand the actual script is in the release branch.
+
+# Installation
+svn checkout https://github.com/chunkinaround/zafind/branches/Release
