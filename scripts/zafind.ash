@@ -1,8 +1,14 @@
-import <canadv.ash>
+#import <canadv.ash>
 
 void main(string command) {
 buffer droppedItemPool;
 string letter = to_upper_case(command);
+print("============================","blue");
+print("Drops from monsters","blue");
+print("drop,monster,location,drop%,length,autosell");
+print("============================","blue");
+
+
 foreach loc in $locations[The Neverending Party,
 The Haunted Kitchen,
 The Haunted Billiards Room,
@@ -101,16 +107,18 @@ monster [int] monster_list = get_monsters(loc);
     droppedItemPool = append(droppedItemPool, to_string(i));
       if (  letter == to_upper_case(substring(to_string(i),0,1))  )  {
         if (is_tradeable(i) && is_discardable(i) && !is_npc_item(i)) {
-        #print(i + " drops from Monster: " + monster_list[mon] + " at locations:"+ loc + " with a drop rate of " + drops[i]);
-        print(i +","+monster_list[mon]+","+loc+","+drops[i]);
+        print(i +","+monster_list[mon]+","+loc+","+drops[i]+","+length(to_string(i))+","+autosell_price(i));
         }
         }
     }
   }
 }
+
+
 string getingred (item ing , string ingredlist, int nodelevel )
 {
-    #this is bad, I know its bad, Im way out of practice, feel free to fix the cs100 level of shit here
+    #this is bad, I know its bad, Im a bad person for releasing this, feel free to fix the cs101 level of shit here
+    #I didnt realize that get_ingredients didnt do multistage crafting until I was most the way through this
     nodelevel = nodelevel + 1;
     string updatedList;
     string update2;
@@ -141,19 +149,98 @@ string getingred (item ing , string ingredlist, int nodelevel )
     }
 
 }
-#weird one offs
-    droppedItemPool = append(droppedItemPool, ",");
-    droppedItemPool = append(droppedItemPool, "," + "meat stack"+ ",");
-
-	buffer_to_file(droppedItemPool,"itempooltest.txt");
-#print("returnvalue: " + update2);
 return update2;
 }
+#weird one offs, due to lack of planning Im probably going to just add random shit to the droppedItemPool here so it can be used in crafting
+print("============================","blue");
+print("Random common things Im not sure where to put","blue");
+print("item,length,autosell");
+print("============================","blue");
+
+
+#no idea on meat paste, dense meat stack, meat stacks, what can I use to procedurally grab these?
+foreach mat in $items[meat paste, dense meat stack, meat stack,] {
+    droppedItemPool = append(droppedItemPool, "," + to_string(mat) );
+  if (  letter == to_upper_case(substring(to_string(mat),0,1))  )  {
+    if (is_tradeable(mat) && is_discardable(mat) && !is_npc_item(mat)) {
+      print(mat+","+length(to_string(mat))+","+autosell_price(mat));
+      }
+  }
+}
+
+/*
+fam.drop_name Doesnt work the way I think it does it doesnt do anything for any of the in standard familiars, maybe if I do a non standard version of this somehow?
+
+foreach fam in $familiars[] {
+if (  letter == to_upper_case(substring(to_string(mat),0,1))  )  {
+  if (is_tradeable(mat) && is_discardable(mat) && !is_npc_item(mat)) {
+    print(mat);
+    }
+  droppedItemPool = append(droppedItemPool, "," + to_string(mat) + ",");
+}
+if (to_string(fam.drop_name) != "none") {
+print(fam);
+print (fam.drop_name);
+}
+}
+*/
+
+#summonables
+foreach mat in $items[scrumptious reagent, dry noodles, coconut shell,little paper umbrella,magical ice cubes,lime,grapefruit] {
+    droppedItemPool = append(droppedItemPool, "," + to_string(mat) );
+if (  letter == to_upper_case(substring(to_string(mat),0,1))  )  {
+  if (is_tradeable(mat) && is_discardable(mat) && !is_npc_item(mat)) {
+      print(mat+","+length(to_string(mat))+","+autosell_price(mat));
+    }
+}
+}
+
+
+#pulverisable
+foreach mat in $items[useless powder,
+twinkly powder,
+hot powder,
+cold powder,
+spooky powder,
+stench powder,
+sleaze powder,
+twinkly nuggets,
+hot nuggets,
+cold nuggets,
+spooky nuggets,
+stench nuggets,
+sleaze nuggets,
+twinkly wad,
+hot wad,
+cold wad,
+spooky wad,
+stench wad,
+sleaze wad] {
+    droppedItemPool = append(droppedItemPool, "," + to_string(mat) );
+
+if (  letter == to_upper_case(substring(to_string(mat),0,1))  )  {
+  if (is_tradeable(mat) && is_discardable(mat) && !is_npc_item(mat)) {
+      print(mat+","+length(to_string(mat))+","+autosell_price(mat));
+    }
+
+
+}
+}
+
+
+#for testing purposes im writing this out to a text file
+buffer_to_file(droppedItemPool,"itempooltest.txt");
+
+
 buffer recipies;
 boolean cancraft;
+print("============================","blue");
 print("Able to be crafted","blue");
+print("Item,length,autosell::ingredients");
+print("============================","blue");
   foreach craftable in $items[] {
     if (  letter == to_upper_case(substring(to_string(craftable),0,1))  ) {
+
       set_length(recipies ,0 );
       int [item] ingredients = get_ingredients(craftable);
       if(ingredients.count() > 0) {
@@ -176,9 +263,17 @@ print("Able to be crafted","blue");
 
   			}
         if (cancraft) {
-        print(craftable + ":" + recipies );
+          #shit, I meant to put this at the start so that I dont have to waste all this code
+          if (is_tradeable(craftable) && is_discardable(craftable) && !is_npc_item(craftable)) {
+            print(craftable +","+length(to_string(craftable))+","+autosell_price(craftable) +"::" + recipies );
+            droppedItemPool = append(droppedItemPool, "," + to_string(craftable) + ",");
+          }
         }
       }
     }
   }
 }
+/*
+print("============================","blue");
+print("Items in standard that I havent handled anywhere else but might be available","blue");
+*/
