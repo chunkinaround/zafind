@@ -1,6 +1,31 @@
+script <zafind>;
 #import <canadv.ash>
+#import vprops
+
+/*
+Usage:
+# Example will find all pizza ingredients starting with n
+zafind n
+
+Properties used in this script
+zafindALL
+ex. set zafindALL = true
+When set to true will print out a list of all non standard items that fit pizzable criteria that havent been printed yet. 
+
+#Not Implemented
+
+zaFindMode
+options: standard || unrestricted || canadv
+ex. set zaFindMode = standard
+Not implemented yet, will eventually do something with different location sets
+when I figure out dependancies I will enable canadv mode and vprops to get location sets
+
+
+*/
 
 void main(string command) {
+
+#using buffers only so its easy to buffer to file at some point in the future, also the regex seems to search them fast so idk?
 buffer droppedItemPool;
 string letter = to_upper_case(command);
 print("============================","blue");
@@ -8,7 +33,7 @@ print("Drops from monsters","blue");
 print("drop,monster,location,drop%,length,autosell");
 print("============================","blue");
 
-
+#need to figure out vprops location_set here 
 foreach loc in $locations[The Neverending Party,
 The Haunted Kitchen,
 The Haunted Billiards Room,
@@ -99,6 +124,9 @@ Tower Level 3,
 Tower Level 4,
 Tower Level 5,
 The Naughty Sorceress' Chamber] {
+
+#gets a list of all monster drops from the location set that start with the letter and are pizzable
+#also appends all drops to a buffer for use in the crafting section later
 monster [int] monster_list = get_monsters(loc);
   foreach mon in monster_list {
   int[item] drops = item_drops(monster_list[mon]);
@@ -118,7 +146,8 @@ monster [int] monster_list = get_monsters(loc);
 string getingred (item ing , string ingredlist, int nodelevel )
 {
     #this is bad, I know its bad, Im a bad person for releasing this, feel free to fix the cs101 level of shit here
-    #I didnt realize that get_ingredients didnt do multistage crafting until I was most the way through this
+    #I didnt realize that get_ingredients didnt do multistage crafting until I was most the way through the script
+    #then I pivoted and wrote this shitty recursion while distracted
     nodelevel = nodelevel + 1;
     string updatedList;
     string update2;
@@ -149,6 +178,7 @@ string getingred (item ing , string ingredlist, int nodelevel )
     }
 
 }
+
 return update2;
 }
 #weird one offs, due to lack of planning Im probably going to just add random shit to the droppedItemPool here so it can be used in crafting
@@ -161,6 +191,7 @@ print("============================","blue");
 #no idea on meat paste, dense meat stack, meat stacks, what can I use to procedurally grab these?
 foreach mat in $items[meat paste, dense meat stack, meat stack,] {
     droppedItemPool = append(droppedItemPool, "," + to_string(mat) );
+    #I reuse the code to check for whether it starts with the letter, is tradable and discardable multiple times, should break this out to a boolean function
   if (  letter == to_upper_case(substring(to_string(mat),0,1))  )  {
     if (is_tradeable(mat) && is_discardable(mat) && !is_npc_item(mat)) {
       print(mat+","+length(to_string(mat))+","+autosell_price(mat));
@@ -169,8 +200,7 @@ foreach mat in $items[meat paste, dense meat stack, meat stack,] {
 }
 
 /*
-fam.drop_name Doesnt work the way I think it does it doesnt do anything for any of the in standard familiars, maybe if I do a non standard version of this somehow?
-
+fam.drop_name Doesnt work the way I think it does it doesnt do anything for any of the in standard familiars, can do something when I do a nonstandard version?
 foreach fam in $familiars[] {
 if (  letter == to_upper_case(substring(to_string(mat),0,1))  )  {
   if (is_tradeable(mat) && is_discardable(mat) && !is_npc_item(mat)) {
@@ -185,7 +215,7 @@ print (fam.drop_name);
 }
 */
 
-#summonables
+# Summonables - something different for non standard?
 foreach mat in $items[scrumptious reagent, dry noodles, coconut shell,little paper umbrella,magical ice cubes,lime,grapefruit] {
     droppedItemPool = append(droppedItemPool, "," + to_string(mat) );
 if (  letter == to_upper_case(substring(to_string(mat),0,1))  )  {
@@ -231,7 +261,7 @@ if (  letter == to_upper_case(substring(to_string(mat),0,1))  )  {
 #for testing purposes im writing this out to a text file
 buffer_to_file(droppedItemPool,"itempooltest.txt");
 
-
+#still using buffers only so its easy to buffer to file at some point in the future
 buffer recipies;
 boolean cancraft;
 print("============================","blue");
@@ -263,17 +293,40 @@ print("============================","blue");
 
   			}
         if (cancraft) {
-          #shit, I meant to put this at the start so that I dont have to waste all this code
+          #shit, I meant to put this at the start so that I dont have to waste all this code note to self when refactoring this eventually
           if (is_tradeable(craftable) && is_discardable(craftable) && !is_npc_item(craftable)) {
             print(craftable +","+length(to_string(craftable))+","+autosell_price(craftable) +"::" + recipies );
+            #adding this to dropped item pool to use in zafindAll section below
             droppedItemPool = append(droppedItemPool, "," + to_string(craftable) + ",");
           }
         }
       }
     }
   }
-}
-/*
+
+#to_boolean will default to false
+if (to_boolean(get_property("zafindALL")))  {
 print("============================","blue");
-print("Items in standard that I havent handled anywhere else but might be available","blue");
-*/
+print("Various Items that are technically standard but I dont know if they are gettable","blue");
+print("Item,length,autosell::ingredients");
+print("============================","blue");
+  buffer nonstandarditems;
+  string standard = visit_url("standard.php");
+  matcher standardmatcher = create_matcher("<span class=\"i\">(.*?)(, )?</span>",standard);
+  #checks everything thats listed as non standard, not just items, I dont want to take the time to parse out just items
+  while (find(standardmatcher)) {
+      nonstandarditems = append(nonstandarditems, to_string(group(standardmatcher, 1)) + ",");
+  }
+    foreach nonstan in $items[] {
+        if (  letter == to_upper_case(substring(to_string(nonstan),0,1))  ) {
+          if (is_tradeable(nonstan) && is_discardable(nonstan) && !is_npc_item(nonstan)) {
+            matcher nonStandard = create_matcher((nonstan + ","),to_string(nonstandarditems));
+            matcher inPool2 = create_matcher((nonstan + ","),to_string(droppedItemPool));
+            if (!find(nonStandard) && !find(inPool2))  {
+              print(nonstan +","+length(to_string(nonstan))+","+autosell_price(nonstan));
+            }
+          }
+        }
+    }
+}
+}
