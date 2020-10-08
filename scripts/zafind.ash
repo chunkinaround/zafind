@@ -312,7 +312,7 @@ if (  letter == to_upper_case(substring(to_string(mat),0,1))  )  {
 }
 print("============================","blue");
 print("Cargo Pockets","blue");
-print("item,length,autosell");
+print("pocket,item,length,autosell");
 print("============================","blue");
 
 foreach i in item_pockets(){
@@ -321,14 +321,14 @@ foreach i in item_pockets(){
     if (  letter == to_upper_case(substring(to_string(mat),0,1))  )  {
       if (is_tradeable(mat) && is_discardable(mat) && !is_npc_item(mat)) {
       #print(mat+","+length(to_string(mat))+","+autosell_price(mat));
-      format_ingred_string(mat+","+length(to_string(mat))+","+autosell_price(mat),mat);
+      format_ingred_string(i+","+mat+","+length(to_string(mat))+","+autosell_price(mat),mat);
       }
     }
   }
 } 
 print("============================","blue");
 print("Cargo Monsters","blue");
-print("monster,item,length,autosell");
+print("pocket,monster,item,length,autosell");
 print("============================","blue");
 foreach j in monster_pockets(){
   monster mon = pocket_monster(j);
@@ -338,7 +338,7 @@ foreach j in monster_pockets(){
     droppedItemPool = append(droppedItemPool, to_string(i));
       if (  letter == to_upper_case(substring(to_string(i),0,1))  )  {
         if (is_tradeable(i) && is_discardable(i) && !is_npc_item(i)) {
-      format_ingred_string(mon+","+i+","+length(to_string(i))+","+autosell_price(i),i);        }
+      format_ingred_string(j+","+mon+","+i+","+length(to_string(i))+","+autosell_price(i),i);        }
         }
     }
   
@@ -350,7 +350,7 @@ foreach mon in $monsters[Burning Daughter,Astrologer of Shub-Jigguwatt,Herald of
     droppedItemPool = append(droppedItemPool, to_string(i));
       if (  letter == to_upper_case(substring(to_string(i),0,1))  )  {
         if (is_tradeable(i) && is_discardable(i) && !is_npc_item(i)) {
-      format_ingred_string(mon+","+i+","+length(to_string(i))+","+autosell_price(i),i);        }
+      format_ingred_string("bell,"+mon+","+i+","+length(to_string(i))+","+autosell_price(i),i);        }
         }
     }
 
