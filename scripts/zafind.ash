@@ -68,7 +68,7 @@ void format_ingred_string (string input, item ingredient ){
   #star
   if (contains_text(itemName, "star")|| contains_text(itemName, "space") || contains_text(itemName, "dot") ) {
     input = input + " || starstruck";
-    color = "green";
+    color = "teal";
     specialProp = specialProp+1;
   }
   if (specialProp > 1){
