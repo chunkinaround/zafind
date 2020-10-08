@@ -20,8 +20,62 @@ ex. set zaFindMode = standard
 Not implemented yet, will eventually do something with different location sets
 when I figure out dependancies I will enable canadv mode and vprops to get location sets
 
-
+relay version that prints nicer
+check for fancy ingredients
+sortability
+whether its a special pizza ingredient
 */
+void format_ingred_string (string input, item ingredient ){
+  int specialProp = 0;
+  string itemName = to_lower_case(to_string(ingredient));
+  string color;
+  # Clover
+  if (contains_text(itemName, "green")|| contains_text(itemName, "luck") ) {
+    input = input + " || lucky";
+    color = "green";
+    specialProp = specialProp+1;
+    print(input,color);
+  }
+  # Dead Mimic
+  if (contains_text(itemName, "cloak")) {
+    input = input + " || cloaked";
+    color = "navy";
+  }
+  # spleen item
+  if (ingredient.spleen > 0) {
+    input = input + " || spleen item";
+    color = "blue";
+    specialProp = specialProp+1;
+  }
+  #combat item
+  if (ingredient.combat == true) {
+    input = input + " || combat item";
+    color = "red";
+    specialProp = specialProp+1;
+  }
+  # familiar item
+  if (to_slot(ingredient) == $slot[familiar]) {
+    input = input + " || fam item";
+    color = "purple";
+    specialProp = specialProp+1;
+  }
+  #milk
+  if (contains_text(itemName, "milk")|| contains_text(itemName, "cheese") ) {
+    input = input + " || cheesy";
+    color = "yellow";
+    specialProp = specialProp+1;
+  }
+  #star
+  if (contains_text(itemName, "star")|| contains_text(itemName, "space") || contains_text(itemName, "dot") ) {
+    input = input + " || starstruck";
+    color = "green";
+    specialProp = specialProp+1;
+  }
+  if (specialProp > 1){
+    color = "maroon";
+  }
+  print(input,color);
+}
 
 void main(string command) {
 
@@ -135,7 +189,7 @@ monster [int] monster_list = get_monsters(loc);
     droppedItemPool = append(droppedItemPool, to_string(i));
       if (  letter == to_upper_case(substring(to_string(i),0,1))  )  {
         if (is_tradeable(i) && is_discardable(i) && !is_npc_item(i)) {
-        print(i +","+monster_list[mon]+","+loc+","+drops[i]+","+length(to_string(i))+","+autosell_price(i));
+        format_ingred_string(i +","+monster_list[mon]+","+loc+","+drops[i]+","+length(to_string(i))+","+autosell_price(i),i);
         }
         }
     }
@@ -194,7 +248,7 @@ foreach mat in $items[meat paste, dense meat stack, meat stack,] {
     #I reuse the code to check for whether it starts with the letter, is tradable and discardable multiple times, should break this out to a boolean function
   if (  letter == to_upper_case(substring(to_string(mat),0,1))  )  {
     if (is_tradeable(mat) && is_discardable(mat) && !is_npc_item(mat)) {
-      print(mat+","+length(to_string(mat))+","+autosell_price(mat));
+      format_ingred_string(mat+","+length(to_string(mat))+","+autosell_price(mat),mat);
       }
   }
 }
@@ -220,7 +274,7 @@ foreach mat in $items[scrumptious reagent, dry noodles, coconut shell,little pap
     droppedItemPool = append(droppedItemPool, "," + to_string(mat) );
 if (  letter == to_upper_case(substring(to_string(mat),0,1))  )  {
   if (is_tradeable(mat) && is_discardable(mat) && !is_npc_item(mat)) {
-      print(mat+","+length(to_string(mat))+","+autosell_price(mat));
+      format_ingred_string(mat+","+length(to_string(mat))+","+autosell_price(mat),mat);
     }
 }
 }
@@ -228,36 +282,79 @@ if (  letter == to_upper_case(substring(to_string(mat),0,1))  )  {
 
 #pulverisable
 foreach mat in $items[useless powder,
-twinkly powder,
-hot powder,
-cold powder,
-spooky powder,
-stench powder,
-sleaze powder,
-twinkly nuggets,
-hot nuggets,
-cold nuggets,
-spooky nuggets,
-stench nuggets,
-sleaze nuggets,
-twinkly wad,
-hot wad,
-cold wad,
-spooky wad,
-stench wad,
-sleaze wad] {
+                      twinkly powder,
+                      hot powder,
+                      cold powder,
+                      spooky powder,
+                      stench powder,
+                      sleaze powder,
+                      twinkly nuggets,
+                      hot nuggets,
+                      cold nuggets,
+                      spooky nuggets,
+                      stench nuggets,
+                      sleaze nuggets,
+                      twinkly wad,
+                      hot wad,
+                      cold wad,
+                      spooky wad,
+                      stench wad,
+                      sleaze wad] 
+{
     droppedItemPool = append(droppedItemPool, "," + to_string(mat) );
 
 if (  letter == to_upper_case(substring(to_string(mat),0,1))  )  {
   if (is_tradeable(mat) && is_discardable(mat) && !is_npc_item(mat)) {
-      print(mat+","+length(to_string(mat))+","+autosell_price(mat));
+      #print(mat+","+length(to_string(mat))+","+autosell_price(mat));
+      format_ingred_string(mat+","+length(to_string(mat))+","+autosell_price(mat),mat);
+    }
+}
+}
+print("============================","blue");
+print("Cargo Pockets","blue");
+print("item,length,autosell");
+print("============================","blue");
+
+foreach i in item_pockets(){
+  foreach mat in pocket_items(i){
+    droppedItemPool = append(droppedItemPool, "," + to_string(mat) );
+    if (  letter == to_upper_case(substring(to_string(mat),0,1))  )  {
+      if (is_tradeable(mat) && is_discardable(mat) && !is_npc_item(mat)) {
+      #print(mat+","+length(to_string(mat))+","+autosell_price(mat));
+      format_ingred_string(mat+","+length(to_string(mat))+","+autosell_price(mat),mat);
+      }
+    }
+  }
+} 
+print("============================","blue");
+print("Cargo Monsters","blue");
+print("monster,item,length,autosell");
+print("============================","blue");
+foreach j in monster_pockets(){
+  monster mon = pocket_monster(j);
+  int[item] drops = item_drops(mon);
+    foreach i in drops {
+    droppedItemPool = append(droppedItemPool, ",");
+    droppedItemPool = append(droppedItemPool, to_string(i));
+      if (  letter == to_upper_case(substring(to_string(i),0,1))  )  {
+        if (is_tradeable(i) && is_discardable(i) && !is_npc_item(i)) {
+      format_ingred_string(mon+","+i+","+length(to_string(i))+","+autosell_price(i),i);        }
+        }
+    }
+  
+} 
+foreach mon in $monsters[Burning Daughter,Astrologer of Shub-Jigguwatt,Herald of Fridgr,Chosen of Yog-Urt,Tentacle of Sssshhsssblllrrggghsssssggggrrgglsssshhssslblgl] {
+  int[item] drops = item_drops(mon);
+    foreach i in drops {
+    droppedItemPool = append(droppedItemPool, ",");
+    droppedItemPool = append(droppedItemPool, to_string(i));
+      if (  letter == to_upper_case(substring(to_string(i),0,1))  )  {
+        if (is_tradeable(i) && is_discardable(i) && !is_npc_item(i)) {
+      format_ingred_string(mon+","+i+","+length(to_string(i))+","+autosell_price(i),i);        }
+        }
     }
 
-
 }
-}
-
-
 #for testing purposes im writing this out to a text file
 buffer_to_file(droppedItemPool,"itempooltest.txt");
 
@@ -323,7 +420,7 @@ print("============================","blue");
             matcher nonStandard = create_matcher((nonstan + ","),to_string(nonstandarditems));
             matcher inPool2 = create_matcher((nonstan + ","),to_string(droppedItemPool));
             if (!find(nonStandard) && !find(inPool2))  {
-              print(nonstan +","+length(to_string(nonstan))+","+autosell_price(nonstan));
+              format_ingred_string(nonstan +","+length(to_string(nonstan))+","+autosell_price(nonstan),nonstan);
             }
           }
         }
