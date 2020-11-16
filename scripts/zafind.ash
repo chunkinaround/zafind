@@ -1,6 +1,4 @@
 script <zafind>;
-#import <canadv.ash>
-#import vprops
 
 /*
 Usage:
@@ -25,6 +23,20 @@ check for fancy ingredients
 sortability
 whether its a special pizza ingredient
 */
+boolean is_shoppable (item ingredient){
+  if (craft_type(ingredient) == "star chart" || craft_type(ingredient) == "Crackpot Mystic"){
+    return true;
+  }
+  return false;
+}
+
+boolean is_pizzable(item ingredient){
+  if (is_tradeable(ingredient) && is_discardable(ingredient) && !is_npc_item(ingredient) && !is_shoppable(ingredient)) {
+    return true;
+  }
+  return false;
+}
+
 void format_ingred_string (string input, item ingredient ){
   int specialProp = 0;
   string itemName = to_lower_case(to_string(ingredient));
@@ -68,7 +80,7 @@ void format_ingred_string (string input, item ingredient ){
   #star
   if (contains_text(itemName, "star")|| contains_text(itemName, "space") || contains_text(itemName, "dot") ) {
     input = input + " || starstruck";
-    color = "teal";
+    color = "green";
     specialProp = specialProp+1;
   }
   if (specialProp > 1){
@@ -188,7 +200,7 @@ monster [int] monster_list = get_monsters(loc);
     droppedItemPool = append(droppedItemPool, ",");
     droppedItemPool = append(droppedItemPool, to_string(i));
       if (  letter == to_upper_case(substring(to_string(i),0,1))  )  {
-        if (is_tradeable(i) && is_discardable(i) && !is_npc_item(i)) {
+        if (is_pizzable(i)) {
         format_ingred_string(i +","+monster_list[mon]+","+loc+","+drops[i]+","+length(to_string(i))+","+autosell_price(i),i);
         }
         }
@@ -247,7 +259,7 @@ foreach mat in $items[meat paste, dense meat stack, meat stack,] {
     droppedItemPool = append(droppedItemPool, "," + to_string(mat) );
     #I reuse the code to check for whether it starts with the letter, is tradable and discardable multiple times, should break this out to a boolean function
   if (  letter == to_upper_case(substring(to_string(mat),0,1))  )  {
-    if (is_tradeable(mat) && is_discardable(mat) && !is_npc_item(mat)) {
+    if (is_pizzable(mat)) {
       format_ingred_string(mat+","+length(to_string(mat))+","+autosell_price(mat),mat);
       }
   }
@@ -273,7 +285,7 @@ print (fam.drop_name);
 foreach mat in $items[scrumptious reagent, dry noodles, coconut shell,little paper umbrella,magical ice cubes,lime,grapefruit] {
     droppedItemPool = append(droppedItemPool, "," + to_string(mat) );
 if (  letter == to_upper_case(substring(to_string(mat),0,1))  )  {
-  if (is_tradeable(mat) && is_discardable(mat) && !is_npc_item(mat)) {
+  if (is_pizzable(mat)) {
       format_ingred_string(mat+","+length(to_string(mat))+","+autosell_price(mat),mat);
     }
 }
@@ -319,7 +331,7 @@ foreach i in item_pockets(){
   foreach mat in pocket_items(i){
     droppedItemPool = append(droppedItemPool, "," + to_string(mat) );
     if (  letter == to_upper_case(substring(to_string(mat),0,1))  )  {
-      if (is_tradeable(mat) && is_discardable(mat) && !is_npc_item(mat)) {
+      if (is_pizzable(mat)) {
       #print(mat+","+length(to_string(mat))+","+autosell_price(mat));
       format_ingred_string(i+","+mat+","+length(to_string(mat))+","+autosell_price(mat),mat);
       }
@@ -337,7 +349,7 @@ foreach j in monster_pockets(){
     droppedItemPool = append(droppedItemPool, ",");
     droppedItemPool = append(droppedItemPool, to_string(i));
       if (  letter == to_upper_case(substring(to_string(i),0,1))  )  {
-        if (is_tradeable(i) && is_discardable(i) && !is_npc_item(i)) {
+        if (is_pizzable(i)) {
       format_ingred_string(j+","+mon+","+i+","+length(to_string(i))+","+autosell_price(i),i);        }
         }
     }
@@ -349,7 +361,7 @@ foreach mon in $monsters[Burning Daughter,Astrologer of Shub-Jigguwatt,Herald of
     droppedItemPool = append(droppedItemPool, ",");
     droppedItemPool = append(droppedItemPool, to_string(i));
       if (  letter == to_upper_case(substring(to_string(i),0,1))  )  {
-        if (is_tradeable(i) && is_discardable(i) && !is_npc_item(i)) {
+        if (is_pizzable(i)) {
       format_ingred_string("bell,"+mon+","+i+","+length(to_string(i))+","+autosell_price(i),i);        }
         }
     }
@@ -391,7 +403,7 @@ print("============================","blue");
   			}
         if (cancraft) {
           #shit, I meant to put this at the start so that I dont have to waste all this code note to self when refactoring this eventually
-          if (is_tradeable(craftable) && is_discardable(craftable) && !is_npc_item(craftable)) {
+          if (is_pizzable(craftable)) {
             print(craftable +","+length(to_string(craftable))+","+autosell_price(craftable) +"::" + recipies );
             #adding this to dropped item pool to use in zafindAll section below
             droppedItemPool = append(droppedItemPool, "," + to_string(craftable) + ",");
@@ -416,7 +428,7 @@ print("============================","blue");
   }
     foreach nonstan in $items[] {
         if (  letter == to_upper_case(substring(to_string(nonstan),0,1))  ) {
-          if (is_tradeable(nonstan) && is_discardable(nonstan) && !is_npc_item(nonstan)) {
+          if (is_pizzable(nonstan)) {
             matcher nonStandard = create_matcher((nonstan + ","),to_string(nonstandarditems));
             matcher inPool2 = create_matcher((nonstan + ","),to_string(droppedItemPool));
             if (!find(nonStandard) && !find(inPool2))  {
