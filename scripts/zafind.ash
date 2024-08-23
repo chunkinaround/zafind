@@ -195,7 +195,7 @@ The Naughty Sorceress' Chamber] {
 #also appends all drops to a buffer for use in the crafting section later
 monster [int] monster_list = get_monsters(loc);
   foreach mon in monster_list {
-  int[item] drops = item_drops(monster_list[mon]);
+  float[item] drops = item_drops(monster_list[mon]);
     foreach i in drops {
     droppedItemPool = append(droppedItemPool, ",");
     droppedItemPool = append(droppedItemPool, to_string(i));
@@ -344,7 +344,7 @@ print("pocket,monster,item,length,autosell");
 print("============================","blue");
 foreach j in monster_pockets(){
   monster mon = pocket_monster(j);
-  int[item] drops = item_drops(mon);
+  float[item] drops = item_drops(mon);
     foreach i in drops {
     droppedItemPool = append(droppedItemPool, ",");
     droppedItemPool = append(droppedItemPool, to_string(i));
@@ -356,7 +356,7 @@ foreach j in monster_pockets(){
   
 } 
 foreach mon in $monsters[Burning Daughter,Astrologer of Shub-Jigguwatt,Herald of Fridgr,Chosen of Yog-Urt,Tentacle of Sssshhsssblllrrggghsssssggggrrgglsssshhssslblgl] {
-  int[item] drops = item_drops(mon);
+  float[item] drops = item_drops(mon);
     foreach i in drops {
     droppedItemPool = append(droppedItemPool, ",");
     droppedItemPool = append(droppedItemPool, to_string(i));
